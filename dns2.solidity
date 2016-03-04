@@ -1,0 +1,75 @@
+contract dns2
+{
+    struct nameData
+    {
+        address owner;
+        uint32 ipv4;
+        uint128 ipv6;
+        bool isIpv6;
+    }
+    mapping (string => nameData) names;
+    address deployer;
+    
+    function dns2()
+    {
+        deployer = msg.sender;
+    }
+    
+    function claim(string name) returns (bool success)
+    {
+        if (names[name].owner != 0) return false;
+        names[name].owner = msg.sender;
+        return true;
+    }
+    
+    function setIpv4(string name, uint32 ip) returns (bool success)
+    {
+        if (names[name].owner != msg.sender) return false;
+        names[name].ipv4 = ip;
+        names[name].ipv6 = 0;
+        names[name].isIpv6 = false;
+        return true;
+    }
+    
+    function setIpv6(string name, uint128 ip) returns (bool success)
+    {
+        if (names[name].owner != msg.sender) return false;
+        names[name].ipv6 = ip;
+        names[name].ipv4 = 0;
+        names[name].isIpv6 = true;
+        return true;
+    }
+    
+    function give(string name, address recipient) returns (bool success)
+    {
+        if (names[name].owner != msg.sender) return false;
+        names[name].owner = recipient;
+        return true;
+    }
+    
+    function owner(string name) returns (address retVal)
+    {
+        return names[name].owner;
+    }
+    
+    function ipv4(string name) returns (uint32 retVal)
+    {
+        return names[name].ipv4;
+    }
+    
+    function ipv6(string name) returns (uint128 retVal)
+    {
+        return names[name].ipv6;
+    }
+    
+    function isIpv6(string name) returns (bool retVal)
+    {
+        return names[name].isIpv6;
+    }
+    
+    function getDonations()
+    {
+        if (msg.sender != deployer) return;
+        deployer.send(this.balance);
+    }
+}
